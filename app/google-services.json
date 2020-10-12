@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "818774222746",
+    "firebase_url": "https://hike-messaging-app.firebaseio.com",
+    "project_id": "hike-messaging-app",
+    "storage_bucket": "hike-messaging-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818774222746:android:effe26a37c3a3fb179fc23",
+        "android_client_info": {
+          "package_name": "com.hike.messagingapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "818774222746-a2hrk7oce6q9qj0kv53pod604480uc3l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hike.messagingapp",
+            "certificate_hash": "4ffc4995de20834bb90f3fa76ea4d61c8ae77dfa"
+          }
+        },
+        {
+          "client_id": "818774222746-q188m2m6al4k65vkev9c5k3hud1i8lkb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0TiBMfnTraLK3NMD5akxP3pma6AEXfOI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "818774222746-q188m2m6al4k65vkev9c5k3hud1i8lkb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
