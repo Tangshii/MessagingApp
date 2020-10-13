@@ -4,7 +4,6 @@ apply plugin: 'com.google.gms.google-services'
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
-
     defaultConfig {
         applicationId "com.hike.messagingapp"
         minSdkVersion 16
@@ -34,6 +33,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:17.4.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.rengwuxian.materialedittext:library:2.1.4'
+    implementation 'com.google.android.gms:play-services-auth:18.1.0'
+    implementation 'com.google.firebase:firebase-auth:19.4.0'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
 
 
     testImplementation 'junit:junit:4.12'
@@ -41,3 +43,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
 }
+
