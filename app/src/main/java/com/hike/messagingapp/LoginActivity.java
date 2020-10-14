@@ -1,4 +1,3 @@
-
 package com.hike.messagingapp;
 
 import androidx.annotation.NonNull;

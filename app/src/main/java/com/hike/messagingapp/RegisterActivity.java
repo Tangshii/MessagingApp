@@ -28,6 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     MaterialEditText username, email, password;
     Button btn_register;
+    String isGoogleSignUp;
 
     FirebaseAuth auth;
     DatabaseReference reference;
@@ -56,6 +57,8 @@ public class RegisterActivity extends AppCompatActivity {
                 String txt_username = username.getText().toString();
                 String txt_email = email.getText().toString();
                 String txt_password = password.getText().toString();
+                isGoogleSignUp = "false";
+
 
                 if(TextUtils.isEmpty(txt_username) || TextUtils.isEmpty(txt_email) || TextUtils.isEmpty(txt_password)){
                     Toast.makeText(RegisterActivity.this,"All fields are required", Toast.LENGTH_SHORT).show();
@@ -66,14 +69,14 @@ public class RegisterActivity extends AppCompatActivity {
 
                 }
                 else{
-                    register(txt_username,txt_email,txt_password);
+                    register(txt_username,txt_email,txt_password,isGoogleSignUp);
                 }
 
             }
         });
     }
 
-    private void register(final String username, String email, String password)
+    private void register(final String username, String email, String password, final String isGoogleSignUp)
     {
         auth.createUserWithEmailAndPassword(email,password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -89,6 +92,7 @@ public class RegisterActivity extends AppCompatActivity {
                             hashMap.put("id",userid);
                             hashMap.put("username",username);
                             hashMap.put("imageURL","default");
+                            hashMap.put("isGoogleSignUp",isGoogleSignUp);
 
                             reference.setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
