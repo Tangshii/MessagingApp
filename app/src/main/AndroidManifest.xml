@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/hike"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".MessageActivity"></activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".StartActivity">
             <intent-filter>
