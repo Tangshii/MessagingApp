@@ -27,24 +27,31 @@ import com.google.firebase.auth.GoogleAuthProvider;
 public class StartActivity extends AppCompatActivity {
 
     Button login, register;
+
     FirebaseAuth auth;
-    SignInButton btSignIn;
-    GoogleSignInClient googleSignInClient;
     FirebaseUser firebaseUser;
 
-    protected void onStart(){
+    SignInButton btSignIn;
+    GoogleSignInClient googleSignInClient;
+
+
+    @Override
+    protected void onStart() {
         super.onStart();
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        //auth = FirebaseAuth.getInstance();
+        //FirebaseUser firebaseUser = auth.getCurrentUser();
+
         if(firebaseUser != null){
             Intent intent = new Intent(StartActivity.this, MainActivity.class);
-            startActivity(new Intent(StartActivity.this, MainActivity.class)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            startActivity(intent);
+            finish();
+            //startActivity(new Intent(StartActivity.this, MainActivity.class)
+            //.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
 
     }
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,14 +70,11 @@ public class StartActivity extends AppCompatActivity {
 
 
         auth = FirebaseAuth.getInstance();
-
         FirebaseUser firebaseUser = auth.getCurrentUser();
-
-        if(firebaseUser != null){
-            startActivity(new Intent(StartActivity.this, MainActivity.class)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        if(firebaseUser != null){	
+            startActivity(new Intent(StartActivity.this, MainActivity.class)	
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));	
         }
-
 
         btSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,7 +83,6 @@ public class StartActivity extends AppCompatActivity {
                 startActivityForResult(intent,100);
             }
         });
-
 
 
         login  = findViewById(R.id.login);
@@ -147,3 +150,4 @@ public class StartActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
     }
 }
+
