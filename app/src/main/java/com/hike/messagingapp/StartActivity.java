@@ -69,12 +69,12 @@ public class StartActivity extends AppCompatActivity {
                 ,googleSignInOptions);
 
 
-        //auth = FirebaseAuth.getInstance();
-        //FirebaseUser firebaseUser = auth.getCurrentUser();
-
-
-
-
+        auth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if(firebaseUser != null){	
+            startActivity(new Intent(StartActivity.this, MainActivity.class)	
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));	
+        }
 
         btSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
