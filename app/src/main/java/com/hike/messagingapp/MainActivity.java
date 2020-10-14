@@ -38,7 +38,7 @@ import com.hike.messagingapp.Fragments.UsersFragment;
 import com.hike.messagingapp.Model.User;
 
 import java.util.ArrayList;
-
+import java.util.EventListener;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -67,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
         username = findViewById(R.id.username);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        
+         if(firebaseUser!= null)	
+        {	
+            Glide.with(MainActivity.this).load(firebaseUser.getPhotoUrl()).into(profile_image);	
+            username.setText(firebaseUser.getDisplayName());	
+        }
         reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
 
         reference.addValueEventListener(new ValueEventListener() {
