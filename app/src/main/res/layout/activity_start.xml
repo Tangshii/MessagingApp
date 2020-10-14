@@ -32,18 +32,17 @@
         android:text="login"/>
 
     <Button
+        android:id="@+id/register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="200dp"
-        android:id="@+id/register"
-        android:text="register"/>
+        android:text="register" />
 
     <com.google.android.gms.common.SignInButton
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/btn_signin"
-        android:layout_margin="16dp"
-        android:layout_centerInParent="true"/>
+        android:layout_marginTop="300dp"/>
 
 
 </RelativeLayout>

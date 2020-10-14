@@ -30,6 +30,20 @@ public class StartActivity extends AppCompatActivity {
     FirebaseAuth auth;
     SignInButton btSignIn;
     GoogleSignInClient googleSignInClient;
+    FirebaseUser firebaseUser;
+
+    protected void onStart(){
+        super.onStart();
+
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser != null){
+            Intent intent = new Intent(StartActivity.this, MainActivity.class);
+            startActivity(new Intent(StartActivity.this, MainActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
+
+    }
+
 
 
     @Override
@@ -49,6 +63,7 @@ public class StartActivity extends AppCompatActivity {
 
 
         auth = FirebaseAuth.getInstance();
+
         FirebaseUser firebaseUser = auth.getCurrentUser();
 
         if(firebaseUser != null){
@@ -64,6 +79,7 @@ public class StartActivity extends AppCompatActivity {
                 startActivityForResult(intent,100);
             }
         });
+
 
 
         login  = findViewById(R.id.login);
@@ -131,4 +147,3 @@ public class StartActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
     }
 }
-
