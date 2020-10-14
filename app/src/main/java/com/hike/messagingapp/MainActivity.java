@@ -68,11 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         
-         if(firebaseUser!= null)	
-        {	
-            Glide.with(MainActivity.this).load(firebaseUser.getPhotoUrl()).into(profile_image);	
-            username.setText(firebaseUser.getDisplayName());	
-        }
+        
         reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
 
         reference.addValueEventListener(new ValueEventListener() {
