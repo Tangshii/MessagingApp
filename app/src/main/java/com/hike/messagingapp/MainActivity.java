@@ -34,11 +34,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hike.messagingapp.Fragments.ChatsFragment;
+import com.hike.messagingapp.Fragments.ProfileFragment;
 import com.hike.messagingapp.Fragments.UsersFragment;
 import com.hike.messagingapp.Model.User;
 
 import java.util.ArrayList;
-
+import java.util.EventListener;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -67,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         username = findViewById(R.id.username);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        
+        
         reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
 
         reference.addValueEventListener(new ValueEventListener() {
@@ -96,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
         viewPagerAdapter.addFragments(new ChatsFragment(), "Chats");
         viewPagerAdapter.addFragments(new UsersFragment(), "Users");
+        viewPagerAdapter.addFragments(new ProfileFragment(), "Profile");
 
         viewPager.setAdapter(viewPagerAdapter);
 
