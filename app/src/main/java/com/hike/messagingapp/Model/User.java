@@ -5,15 +5,26 @@ public class User {
     private String id;
     private String username;
     private String imageURL;
+    private String isGoogleSignUp;
 
-    public User(String id, String username, String imageURL) {
+    public User(String id, String username, String imageURL,String isGoogleSignUp) {
         this.id = id;
         this.username = username;
         this.imageURL = imageURL;
+        this.isGoogleSignUp = isGoogleSignUp;
     }
 
     public User(){
 
+    }
+
+
+
+    public void setIsGoogleSignUp(String isGoogleSignUp) {
+        this.isGoogleSignUp = isGoogleSignUp;
+    }
+    public String getIsGoogleSignUp() {
+        return isGoogleSignUp;
     }
 
     public String getId() {

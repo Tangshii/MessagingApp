@@ -15,11 +15,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "818774222746-a2hrk7oce6q9qj0kv53pod604480uc3l.apps.googleusercontent.com",
+          "client_id": "818774222746-u9629o33pptmkin3k6ir2hqmt53sn1l6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.hike.messagingapp",
             "certificate_hash": "4ffc4995de20834bb90f3fa76ea4d61c8ae77dfa"
+          }
+        },
+        {
+          "client_id": "818774222746-s53ghuq64s53nmp0seil1l8mvk91pu3o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hike.messagingapp",
+            "certificate_hash": "eac59d707632060f1d8f8101f5b956638c149296"
           }
         },
         {
