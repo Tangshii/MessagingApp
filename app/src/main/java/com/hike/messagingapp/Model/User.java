@@ -6,8 +6,9 @@ public class User {
     private String username;
     private String imageURL;
     private String isGoogleSignUp;
+    private String status;
 
-    public User(String id, String username, String imageURL,String isGoogleSignUp) {
+    public User(String id, String username, String imageURL,String isGoogleSignUp, String status) {
         this.id = id;
         this.username = username;
         this.imageURL = imageURL;
@@ -49,5 +50,13 @@ public class User {
 
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
