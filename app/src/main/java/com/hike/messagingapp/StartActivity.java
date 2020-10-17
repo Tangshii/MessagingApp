@@ -146,6 +146,7 @@ public class StartActivity extends AppCompatActivity {
                                             hashMap.put("username",username);
                                             hashMap.put("imageURL",profile_image);
                                             hashMap.put("isGoogleSignUp","true");
+                                            hashMap.put("status","offline");
 
                                             reference.setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
