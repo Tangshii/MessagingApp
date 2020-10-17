@@ -69,12 +69,8 @@ public class StartActivity extends AppCompatActivity {
                 .build();
         googleSignInClient = GoogleSignIn.getClient(StartActivity.this
                 ,googleSignInOptions);
-
-
         auth = FirebaseAuth.getInstance();
-
         FirebaseUser firebaseUser = auth.getCurrentUser();
-
         if(firebaseUser != null){
             startActivity(new Intent(StartActivity.this, MainActivity.class)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
