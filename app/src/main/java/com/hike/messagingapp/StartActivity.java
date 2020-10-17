@@ -69,12 +69,8 @@ public class StartActivity extends AppCompatActivity {
                 .build();
         googleSignInClient = GoogleSignIn.getClient(StartActivity.this
                 ,googleSignInOptions);
-
-
         auth = FirebaseAuth.getInstance();
-
         FirebaseUser firebaseUser = auth.getCurrentUser();
-
         if(firebaseUser != null){
             startActivity(new Intent(StartActivity.this, MainActivity.class)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -149,7 +145,7 @@ public class StartActivity extends AppCompatActivity {
                                             hashMap.put("id",userid);
                                             hashMap.put("username",username);
                                             hashMap.put("imageURL",profile_image);
-                                            //hashMap.put("isGoogleSignUp",isGoogleSignUp);
+                                            hashMap.put("isGoogleSignUp","true");
 
                                             reference.setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
