@@ -15,6 +15,8 @@ public class User {
         this.username = username;
         this.imageURL = imageURL;
         this.isGoogleSignUp = isGoogleSignUp;
+        this.status = status;
+        this.search = search;
     }
 
     public User(){
