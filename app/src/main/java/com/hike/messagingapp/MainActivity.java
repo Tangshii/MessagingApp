@@ -70,8 +70,6 @@ public class MainActivity extends AppCompatActivity {
         username = findViewById(R.id.username);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        
-        
         reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
 
         reference.addValueEventListener(new ValueEventListener() {
@@ -83,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
                     profile_image.setImageResource(R.mipmap.ic_launcher);
                 }
                 else {
-                    Glide.with(MainActivity.this).load(user.getImageURL()).into(profile_image);
+
+                    Glide.with(getApplicationContext()).load(user.getImageURL()).into(profile_image);
                 }
 
             }
