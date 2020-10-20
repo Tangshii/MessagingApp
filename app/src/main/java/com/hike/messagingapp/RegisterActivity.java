@@ -91,6 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
                             hashMap.put("imageURL","default");
                             hashMap.put("isGoogleSignUp","false");
                             hashMap.put("status","offline");
+                            hashMap.put("search",username.toLowerCase());
 
 
                             reference.setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
