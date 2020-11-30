@@ -1,30 +1,27 @@
 package com.hike.messagingapp;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager2.widget.ViewPager2;
-
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
+
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
+
 import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,29 +30,29 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
 import com.hike.messagingapp.Fragments.ChatsFragment;
 import com.hike.messagingapp.Fragments.ProfileFragment;
 import com.hike.messagingapp.Fragments.UsersFragment;
+import com.hike.messagingapp.Model.Chat;
 import com.hike.messagingapp.Model.User;
+import com.hike.messagingapp.Adapter.ViewPagerAdapter;
+import com.rengwuxian.materialedittext.MaterialEditText;
 
-import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-
 
 public class MainActivity extends AppCompatActivity {
 
     CircleImageView profile_image;
     TextView username;
 
+    private ProgressDialog spinner;
+
     FirebaseUser firebaseUser;
     DatabaseReference reference;
 
-    Button btlogout;
-    FirebaseAuth auth;
-    GoogleSignInClient googleSignInClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,78 +62,90 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
 
-
         profile_image = findViewById(R.id.profile_image);
         username = findViewById(R.id.username);
+        spinner = new ProgressDialog(this);
+        spinner.setMessage("loading...");
+        spinner.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        spinner.setCanceledOnTouchOutside(false);
+        spinner.show();
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
 
+        // query db for profile img and set it
+        setProfileFromDB();
+
+
+        final TabLayout tabLayout = findViewById(R.id.tab_layout);
+        final ViewPager viewPager = findViewById(R.id.view_pager);
+
+
+        // get Chats table
+        reference = FirebaseDatabase.getInstance().getReference("Chats");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                username.setText(user.getUsername());
-                if(user.getImageURL().equals("default")){
-                    profile_image.setImageResource(R.mipmap.ic_launcher);
-                }
-                else {
-
-                    Glide.with(getApplicationContext()).load(user.getImageURL()).into(profile_image);
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        TabLayout tabLayout = findViewById(R.id.tab_layout);
-        ViewPager viewPager = findViewById(R.id.view_pager);
-
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-        viewPagerAdapter.addFragments(new ChatsFragment(), "Chats");
-        viewPagerAdapter.addFragments(new UsersFragment(), "Users");
-        viewPagerAdapter.addFragments(new ProfileFragment(), "Profile");
-
-        viewPager.setAdapter(viewPagerAdapter);
-
-        tabLayout.setupWithViewPager(viewPager);
-
-
-        btlogout = findViewById(R.id.btn_logout);
-
-        auth = FirebaseAuth.getInstance();
-        FirebaseUser firebaseUser = auth.getCurrentUser();
-
-        googleSignInClient = GoogleSignIn.getClient(MainActivity.this
-                , GoogleSignInOptions.DEFAULT_SIGN_IN);
-
-        btlogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                googleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                         if(task.isSuccessful()){
-
-                             auth.signOut();
-                             Toast.makeText(getApplicationContext()
-                             ,"Logout successful",Toast.LENGTH_SHORT).show();
-                             finish();
-                         }
+                int unread = 0;
+                // loop thru a Chats snapshot for messages that user did not see
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                    Chat chat = snapshot.getValue(Chat.class);
+                    if (chat.getReceiver().equals(firebaseUser.getUid()) && !chat.isIsseen()) {
+                        unread++;
                     }
-                });
+                }
+
+                // create adapter
+                ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+                // add fragments
+                if (unread == 0) {
+                    viewPagerAdapter.addFragment(new ChatsFragment(), "Chats");
+                } else {
+                    viewPagerAdapter.addFragment(new ChatsFragment(), "Chats (" + unread + ") ");
+                }
+                viewPagerAdapter.addFragment(new UsersFragment(), "Users");
+                viewPagerAdapter.addFragment(new ProfileFragment(), "Profile");
+
+                // set adapter and tab layout
+                viewPager.setAdapter(viewPagerAdapter);
+                tabLayout.setupWithViewPager(viewPager);
+                spinner.dismiss();
             }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
 
 
 
 
     }
+
+
+    // searches db for users profile img
+    void setProfileFromDB() {
+        if(firebaseUser.getUid()!=null) {
+            reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    User user = dataSnapshot.getValue(User.class);
+                    username.setText(user.getUsername());
+                    if (user.getImageURL() != null) {
+                        if (user.getImageURL().equals("default")) {
+                            profile_image.setImageResource(R.mipmap.ic_launcher);
+                        } else {
+                            Glide.with(getApplicationContext()).load(user.getImageURL()).into(profile_image);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -158,52 +167,17 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    class ViewPagerAdapter extends FragmentPagerAdapter{
 
-        private ArrayList<Fragment> fragments;
-        private ArrayList<String> titles;
 
-        ViewPagerAdapter(FragmentManager fm){
-            super(fm);
-            this.fragments = new ArrayList<>();
-            this.titles = new ArrayList<>();
-        }
-
-        @NonNull
-        @Override
-        public Fragment getItem(int position) {
-            return fragments.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return fragments.size();
-        }
-
-        public void addFragments(Fragment fragment, String title ){
-            fragments.add(fragment);
-            titles.add(title);
-        }
-
-        @Nullable
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return titles.get(position);
-        }
-    }
-
-    private void status(String status){
+    private void status(String status) {
         reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
-
-        HashMap<String, Object > hashMap = new HashMap<>();
-        hashMap.put("status",status);
-
+        HashMap < String, Object > hashMap = new HashMap < > ();
+        hashMap.put("status", status);
         reference.updateChildren(hashMap);
-
     }
 
     @Override
-    public void onResume(){
+    protected void onResume() {
         super.onResume();
         status("online");
     }
@@ -213,4 +187,24 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         status("offline");
     }
+
+
+    // close fragments keyboard on tap outside
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if ( v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
 }

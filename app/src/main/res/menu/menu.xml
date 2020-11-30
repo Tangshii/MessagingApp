@@ -3,8 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/translate"
+        android:title="Translation settings"
+        app:showAsAction="never"
+         />
+
+    <item
+        android:id="@+id/colors"
+        android:title="Color customize"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/enhance"
+        android:title="Enhanced messages"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/logout"
         android:title="Logout"
         app:showAsAction="never"/>
+
+
 
 </menu>

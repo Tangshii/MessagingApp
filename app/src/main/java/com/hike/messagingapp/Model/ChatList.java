@@ -1,15 +1,14 @@
 package com.hike.messagingapp.Model;
 
-public class ChatList {
 
+public class Chatlist {
     public String id;
 
-    public ChatList(String id) {
+    public Chatlist(String id) {
         this.id = id;
     }
 
-    public ChatList() {
-
+    public Chatlist() {
     }
 
     public String getId() {
