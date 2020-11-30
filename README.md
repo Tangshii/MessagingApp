@@ -1,4 +1,4 @@
-# MessagingAppHike 
+# MessagingApp
 Hike is an android chatting App.
  - Meghana Kodali
  - Srikar Balmuri
