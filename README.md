@@ -4,4 +4,3 @@ Hike is an android chatting App.
  - Srikar Balmuri
  - Thang Nguyen
  - Jaden Goldman
- 
