@@ -4,8 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -29,16 +29,17 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class StartActivity extends AppCompatActivity {
 
-    Button login, register;
+    Button login, register, phone;
     FirebaseAuth auth;
     SignInButton btSignIn;
     GoogleSignInClient googleSignInClient;
     FirebaseUser firebaseUser;
-    FirebaseDatabase firebaseDatabase;
+
+    private ProgressDialog loadingBar;
+
 
 
     protected void onStart(){
@@ -61,6 +62,11 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start);
 
         btSignIn = findViewById(R.id.btn_signin);
+        login  = findViewById(R.id.login);
+        register = findViewById(R.id.register);
+        phone = findViewById(R.id.phone_button);
+
+        loadingBar = new ProgressDialog(this);
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(
                 GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -84,21 +90,18 @@ public class StartActivity extends AppCompatActivity {
         btSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                loadingBar.setTitle("Loading Account...");
+                loadingBar.setCanceledOnTouchOutside(true);
+                loadingBar.show();
                 Intent intent = googleSignInClient.getSignInIntent();
                 startActivityForResult(intent,100);
             }
         });
 
-
-
-        login  = findViewById(R.id.login);
-        register = findViewById(R.id.register);
-
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(StartActivity.this, LoginActivity.class));
-
             }
         });
 
@@ -106,6 +109,15 @@ public class StartActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(StartActivity.this, RegisterActivity.class));
+            }
+        });
+
+        phone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Intent phoneIntent = new Intent(StartActivity.this, PhoneActivity.class);
+                startActivity(phoneIntent);
             }
         });
     }
@@ -119,7 +131,7 @@ public class StartActivity extends AppCompatActivity {
 
             if(signInAccountTask.isSuccessful()){
                 String s = "Google sign in successful";
-                displayToast(s);
+                Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
                 try{
                     GoogleSignInAccount googleSignInAccount = signInAccountTask
                             .getResult(ApiException.class);
@@ -171,6 +183,8 @@ public class StartActivity extends AppCompatActivity {
                                         else{
                                             Toast.makeText(StartActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
                                         }
+
+                                        loadingBar.dismiss();
                                     }
                                 });
 
@@ -184,9 +198,8 @@ public class StartActivity extends AppCompatActivity {
 
             }
         }
+
+
     }
 
-    private void displayToast(String s) {
-        Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
-    }
 }
