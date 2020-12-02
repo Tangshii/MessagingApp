@@ -6,13 +6,16 @@ public class Chat {
     private String receiver;
     private String message;
     private boolean isseen;
+    private String type;
     private String prevTranslate;
 
-    public Chat(String sender, String receiver, String message, boolean isseen) {
+    public Chat(String sender, String receiver, String message, boolean isseen, String type, String prevTranslate) {
         this.sender = sender;
         this.receiver = receiver;
         this.message = message;
         this.isseen = isseen;
+        this.type = type;
+        this.prevTranslate = prevTranslate;
     }
 
     public Chat() {
@@ -49,7 +52,16 @@ public class Chat {
     public void setIsseen(boolean isseen) {
         this.isseen = isseen;
     }
+    
+      public String getType() {		     
+         return type;		         
+     }		     
 
+ 
+      public void setType(String type) {		     
+         this.type = type;		        
+     }
+                                        
     public String getPrevTranslate() {
         return prevTranslate;
     }
