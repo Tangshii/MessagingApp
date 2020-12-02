@@ -1,15 +1,22 @@
 package com.hike.messagingapp.Adapter;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -20,11 +27,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.hike.messagingapp.Fragments.ChatsFragment;
-import com.hike.messagingapp.Fragments.ProfileFragment;
-import com.hike.messagingapp.Fragments.UsersFragment;
 import com.hike.messagingapp.MessageActivity;
 import com.hike.messagingapp.Model.Chat;
+import com.hike.messagingapp.Model.Chatlist;
 import com.hike.messagingapp.Model.User;
 import com.hike.messagingapp.R;
 
@@ -35,13 +40,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     private Context mContext;
     private List<User> mUsers;
     private boolean ischat;
-
+    boolean once=false;
     String theLastMessage;
+    ProgressDialog loading;
 
-    public UserAdapter(Context mContext, List<User> mUsers, boolean ischat){
+    final FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
+
+
+    public UserAdapter(Context mContext, List<User> mUsers, boolean ischat) {
         this.mUsers = mUsers;
         this.mContext = mContext;
         this.ischat = ischat;
+
     }
 
     @NonNull
@@ -52,6 +62,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         final User user = mUsers.get(position);
@@ -60,17 +71,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         setUsername(user, holder);
 
         // set the profile image of the searched users
-        if (user.getImageURL().equals("default")){
-            holder.profile_image.setImageResource(R.mipmap.ic_launcher);
+        if (user.getImageURL().equals("default")) {
+            holder.profile_image.setImageResource(R.drawable.account);
         } else {
             Glide.with(mContext).load(user.getImageURL()).into(holder.profile_image);
         }
 
-        if (ischat){ // adapter is for chats tab
+        if (ischat) { // adapter is for chats tab
             lastMessage(user.getId(), holder.last_msg); // so show last message
-
             // set online indicator
-            if (user.getStatus().equals("online")){
+            if (user.getStatus().equals("online")) {
                 holder.img_on.setVisibility(View.VISIBLE);
                 holder.img_off.setVisibility(View.GONE);
             } else {
@@ -92,7 +102,162 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 mContext.startActivity(intent);
             }
         });
+
+
+
+        // Delete show two dialogs and deletes convo fore both sides
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                // Use the Builder class for convenient dialog construction
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle("Delete Conversation?\n").setMessage("it will be deleted for both users")
+                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                // second dialog
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setTitle("Are you sure?\n").setMessage("BOTH sides will be deleted forever")
+                                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                loading = new ProgressDialog(mContext);
+                                                loading.setMessage("deleting...");
+                                                loading.setCanceledOnTouchOutside(false);
+                                                loading.show();
+                                                once=true;
+                                                if(once)
+                                                    getReceiver(user.getUsername());
+                                                else
+                                                    once=false;
+                                            }
+                                        })
+                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+
+                                            }
+                                        });
+                                builder.show();
+
+
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                            }
+                        });
+                builder.show();
+
+                return true;
+            }
+
+
+        });
+
+
+
+
     }
+
+
+
+    void getReceiver(final String receiverName){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+        //search Chats table
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String receiverId = "";
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    User user = snapshot.getValue(User.class);
+                    if( user.getUsername() == receiverName ){
+                        receiverId = user.getId();
+                        //Toast.makeText(mContext, receiverId, Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                }
+                deleteConvo(receiverId);
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
+
+
+    // delete both chatlists
+    void deleteConvo(final String receiverId){
+
+        // delete sender convo
+        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(fUser.getUid()).child(receiverId);
+
+        chatRefReceiver.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        snapshot.getRef().removeValue();
+                        break;
+                }
+
+
+                //delete receiver convo
+                final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Chatlist")
+                        .child(receiverId).child(fUser.getUid());
+                ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            snapshot.getRef().removeValue();
+                            break;
+                        }
+                        loading.dismiss();
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                });
+
+
+                deleteChats(receiverId);
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+
+    }
+
+
+    // delete actual messages
+    void deleteChats(final String receiverId){
+        // get Chats table
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
+        //search Chats table
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Chat chat = snapshot.getValue(Chat.class);
+
+                    if (chat.getReceiver() != null && chat.getSender()!=null) {
+
+                        if (chat.getSender().equals(fUser.getUid()) && chat.getReceiver().equals(receiverId) ||
+                                chat.getReceiver().equals(fUser.getUid()) && chat.getSender().equals(receiverId)) {
+                            snapshot.getRef().removeValue();
+                            Log.e("DELETEEEEEEEEEEEEEDDDD", snapshot.getKey());
+                        }
+
+                    }
+
+                }
+                loading.dismiss();
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
+
 
     @Override
     public int getItemCount() {
@@ -102,7 +267,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             return 0;
     }
 
-    public  class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView username;
         public ImageView profile_image;
@@ -123,7 +288,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
 
     // sets holder.username and put number of unread messages
-    private void setUsername(final User user, final ViewHolder holder){
+    private void setUsername(final User user, final ViewHolder holder) {
         // get firebase user
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         // get Chats table
@@ -134,44 +299,43 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int unread = 0;
                 // loop thru each Chats
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Chat chat = snapshot.getValue(Chat.class);
-                    if (firebaseUser != null && chat != null) {
+                    if (firebaseUser != null && chat.getReceiver() != null) {
                         // if receiver is user and message is not seen
-                        if ( ( chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(user.getId())  )
+                        if ((chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(user.getId()))
                                 && !chat.isIsseen()) {
                             unread++;
                         }
                     }
                 }
                 // set username with number of unread messages
-                if (unread == 0){
+                if (unread == 0) {
                     holder.username.setText(user.getUsername());
                 } else {
-                    holder.username.setText(user.getUsername() + " ("+ unread+")");
+                    holder.username.setText(user.getUsername() + " (" + unread + ")");
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) { }
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
         });
     }
 
 
-
     //check for last message
-    private void lastMessage(final String userid, final TextView last_msg){
+    private void lastMessage(final String userid, final TextView last_msg) {
         theLastMessage = "default";
-
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Chat chat = snapshot.getValue(Chat.class);
-                   if (firebaseUser != null && chat != null) {
+                    if (firebaseUser != null && chat.getReceiver() != null) {
                         if (chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid) ||
                                 chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())) {
                             theLastMessage = chat.getMessage();
@@ -179,16 +343,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                     }
                 }
 
-                if( theLastMessage == "default" )
+                if (theLastMessage == "default")
                     last_msg.setText("No Message");
-                else {
-                        if(theLastMessage.startsWith("http")){
-                            last_msg.setText("Image");
-                        }
-                        else
-                            last_msg.setText(theLastMessage);
+                else
+                    last_msg.setText(theLastMessage);
 
-                }
             }
 
             @Override

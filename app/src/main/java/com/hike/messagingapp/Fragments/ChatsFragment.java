@@ -1,10 +1,21 @@
 package com.hike.messagingapp.Fragments;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 
+import android.text.Layout;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -24,6 +35,9 @@ import com.hike.messagingapp.Model.Chatlist;
 import com.hike.messagingapp.Model.User;
 import com.hike.messagingapp.Notifications.Token;
 import com.hike.messagingapp.R;
+import com.skydoves.colorpickerview.ColorEnvelope;
+import com.skydoves.colorpickerview.ColorPickerDialog;
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +46,7 @@ import java.util.List;
 public class ChatsFragment extends Fragment {
 
     private RecyclerView recyclerView;
+    TextView textView;
 
     private UserAdapter userAdapter;
     private List<User> mUsers;
@@ -49,7 +64,18 @@ public class ChatsFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext())); // set manager to recycler view
 
+        textView = view.findViewById(R.id.chat_tap);
+        registerForContextMenu(textView);
+
+        SharedPreferences prefs = this.getActivity().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
+        int secondary = prefs.getInt("secondary", -1);
+        if(secondary != -1){
+            recyclerView.setBackgroundColor(secondary);
+            textView.setBackgroundColor(secondary);
+        }
+
         fuser = FirebaseAuth.getInstance().getCurrentUser();
+
 
         usersList = new ArrayList<>();
         // get all the chat list the user has
@@ -109,11 +135,50 @@ public class ChatsFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, final View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        SharedPreferences prefs = this.getActivity().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = prefs.edit();
+
+        if(v.getId() == R.id.chat_tap) {
+            new ColorPickerDialog.Builder(getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+                    .setPreferenceName("MyColorPickerDialog")
+                    .setPositiveButton("confirm",
+                            new ColorEnvelopeListener() {
+                                @Override
+                                public void onColorSelected(ColorEnvelope envelope, boolean fromUser) {
+
+                                    int color = envelope.getColor();
+                                    recyclerView.setBackgroundColor(color);
+                                    textView.setBackgroundColor(color);
+                                    editor.putInt("secondary", color);
+                                    editor.apply();
+                                }
+                            })
+                    .setNegativeButton("cancel",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            })
+                    .attachAlphaSlideBar(true)
+                    .attachBrightnessSlideBar(true)
+                    .show();
+        }
+    }
+
     private void updateToken(String token){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Tokens");
         Token token1 = new Token(token);
         reference.child(fuser.getUid()).setValue(token1);
     }
+
+
+
+
 
 
 

@@ -6,16 +6,17 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:padding="24dp"
-    android:background="@drawable/hikebackground"
+    android:background="@color/colorPrimary"
     android:orientation="vertical"
-    tools:context=".StartActivity">
+    tools:context=".StartActivity"
+    >
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/title"
         android:gravity="center"
-        android:text="Hike - Messaging App"
+        android:text="Hike Messaging App"
         android:textSize="25sp"
         android:textStyle="bold"
         android:textColor="#fff"/>
@@ -26,9 +27,10 @@
         android:layout_below="@+id/title"
         android:layout_marginTop="40dp"
         android:id="@+id/login"
-        android:text="login"
+        android:text="Login"
         android:background="@color/colorPrimaryDark"
-        android:textColor="#fff"/>
+        android:textColor="#fff"
+        android:textAllCaps="false"/>
 
     <Button
         android:layout_width="match_parent"
@@ -36,9 +38,10 @@
         android:layout_below="@+id/login"
         android:layout_marginTop="20dp"
         android:id="@+id/register"
-        android:text="register"
+        android:text="Register"
         android:background="@color/colorPrimaryDark"
-        android:textColor="#fff"/>
+        android:textColor="#fff"
+        android:textAllCaps="false"/>
 
 
 
@@ -47,10 +50,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/register"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="50dp"
         android:text="Phone Login/Register"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorPrimaryDark"
         android:textColor="#fff"
+        android:textAllCaps="false"
         />
 
     <com.google.android.gms.common.SignInButton
@@ -59,7 +63,6 @@
         android:layout_below="@+id/phone_button"
         android:layout_marginTop="20dp"
         android:id="@+id/btn_signin"
-        android:background="@color/colorPrimaryDark"
         android:textColor="#fff"
         />
 

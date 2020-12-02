@@ -7,6 +7,7 @@ public class User {
     private String imageURL;
     private String status;
     private String search;
+    private String bio;
 
     public User(String id, String username, String imageURL, String status, String search) {
         this.id = id;
@@ -58,5 +59,13 @@ public class User {
 
     public void setSearch(String search) {
         this.search = search;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 }

@@ -1,6 +1,10 @@
 package com.hike.messagingapp.Adapter;
 
 import android.content.Context;
+
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -23,71 +28,65 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public static final int MSG_TYPE_LEFT = 0;
     public static final int MSG_TYPE_RIGHT = 1;
 
+
     private Context mContext;
     private List<Chat> mChat; // list of messages
     private String imageurl; // receiver profile pic
     private String userImg; // sender profile pic
 
+    private OnItemClickListener mOnItemClickListener;
 
     FirebaseUser fuser;
 
-    public MessageAdapter(Context mContext, List<Chat> mChat, String imageurl, String userImg){
+    public MessageAdapter(Context mContext, List<Chat> mChat, String imageurl, String userImg, OnItemClickListener onItemClickListener){
         this.mChat = mChat;
         this.mContext = mContext;
         this.imageurl = imageurl;
         this.userImg = userImg;
+        this.mOnItemClickListener= onItemClickListener;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @NonNull
     @Override
     public MessageAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == MSG_TYPE_RIGHT) { //message is from sender
             // inflate recycler view with chat item right
             View view = LayoutInflater.from(mContext).inflate(R.layout.chat_item_right, parent, false);
-            return new ViewHolder(view);
+
+            SharedPreferences colorPref = mContext.getSharedPreferences("colorPref", Context.MODE_PRIVATE);
+            int primary = colorPref.getInt("primary", -1);
+            if(primary != -1){
+                view.findViewById(R.id.show_message).setBackgroundTintList(ColorStateList.valueOf(primary));
+            }
+
+            return new ViewHolder(view, mOnItemClickListener);
         } else { //message is from receiver
             View view = LayoutInflater.from(mContext).inflate(R.layout.chat_item_left, parent, false);
-            return new ViewHolder(view);
+            return new ViewHolder(view, mOnItemClickListener);
         }
     }
+
+
+
+
 
     @Override
     public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
 
-        fuser = FirebaseAuth.getInstance().getCurrentUser();
         Chat chat = mChat.get(position);
-        String messageType = chat.getType();
-        if(messageType == "image"){
-                if(mChat.get(position).getSender().equals(fuser.getUid())) {
-                    holder.messageSenderPicture.setVisibility(View.VISIBLE);
-                    Glide.with(mContext).load(chat.getMessage()).into(holder.messageSenderPicture);
 
-                }
-                else{
-                    holder.messageReceiverPicture.setVisibility(View.VISIBLE);
-                    Glide.with(mContext).load(chat.getMessage()).into(holder.messageReceiverPicture);
-
-                }
-            holder.show_message.setVisibility(View.GONE);
-
-        }
-        else{
-
-            holder.show_message.setText(chat.getMessage());
-            holder.show_message.setVisibility(View.VISIBLE);
-
-        }
-
+        holder.show_message.setText(chat.getMessage());
 
         // set profile image for the receiver messages
         if (imageurl.equals("default"))
-            holder.profile_image.setImageResource(R.mipmap.ic_launcher);
+            holder.profile_image.setImageResource(R.drawable.account);
         else
             Glide.with(mContext).load(imageurl).into(holder.profile_image);
 
         // set profile image for the sender messages
         if (userImg.equals("default"))
-            holder.userImg.setImageResource(R.mipmap.ic_launcher);
+            holder.userImg.setImageResource(R.drawable.account);
         else
             Glide.with(mContext).load(userImg).into(holder.userImg);
 
@@ -102,6 +101,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             holder.txt_seen.setVisibility(View.GONE);
         }
 
+
+
+
+
+
+
     }
 
     @Override
@@ -109,25 +114,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         return mChat.size();
     }
 
-    public  class ViewHolder extends RecyclerView.ViewHolder{
-
-        public TextView show_message;
-        public ImageView profile_image;
-        public ImageView userImg;
-        public TextView txt_seen;
-        public ImageView messageSenderPicture, messageReceiverPicture;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-
-            show_message = itemView.findViewById(R.id.show_message);
-            profile_image = itemView.findViewById(R.id.profile_image);
-            userImg = itemView.findViewById(R.id.userImg);
-            txt_seen = itemView.findViewById(R.id.txt_seen);
-            messageReceiverPicture = itemView.findViewById(R.id.message_receiver_image_view);
-            messageSenderPicture = itemView.findViewById(R.id.message_sender_image_view);
-        }
-    }
 
     @Override
     public int getItemViewType(int position) {
@@ -138,4 +124,48 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             return MSG_TYPE_LEFT;
         }
     }
+
+    public String getImageurl() {
+        return imageurl;
+    }
+
+    public String getUserImg() {
+        return userImg;
+    }
+
+    public  class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+
+        public TextView show_message;
+        public ImageView profile_image;
+        public ImageView userImg;
+        public TextView txt_seen;
+
+        OnItemClickListener onItemClickListener;
+
+        public ViewHolder(View itemView, OnItemClickListener onItemClickListener) {
+            super(itemView);
+
+            show_message = itemView.findViewById(R.id.show_message);
+            profile_image = itemView.findViewById(R.id.profile_image);
+            userImg = itemView.findViewById(R.id.userImg);
+            txt_seen = itemView.findViewById(R.id.txt_seen);
+            this.onItemClickListener = onItemClickListener;
+            show_message.setOnClickListener(this);
+
+        }
+
+
+        @Override
+        public void onClick(View v) {
+            onItemClickListener.onItemClick(getAdapterPosition());
+
+        }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(int postition);
+    }
+
+
+
 }

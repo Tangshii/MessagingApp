@@ -35,6 +35,11 @@
             android:name="com.hike.messagingapp.ResetPasswordActivity"
             android:parentActivityName="com.hike.messagingapp.LoginActivity" />
 
+        <activity
+            android:name="com.hike.messagingapp.TranslateActivity"
+             />
+
+
         <service android:name="com.hike.messagingapp.Notifications.MyFirebaseIdService"
             android:enabled="true"
             android:exported="true">

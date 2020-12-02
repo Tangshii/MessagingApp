@@ -2,6 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+
     <item
         android:id="@+id/translate"
         android:title="Translation settings"
@@ -10,12 +12,12 @@
 
     <item
         android:id="@+id/colors"
-        android:title="Color customize"
+        android:title="Color customization"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/enhance"
-        android:title="Enhanced messages"
+        android:title="Enhanced messagesX"
         app:showAsAction="never"/>
 
     <item
