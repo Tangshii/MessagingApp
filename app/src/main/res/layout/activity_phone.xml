@@ -21,6 +21,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginTop="16dp"
+        android:padding="24dp"
         android:gravity="center_horizontal" />
 
 
@@ -45,7 +46,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:met_floatingLabel="normal"
-        android:hint="Username"/>
+        android:hint="Set Username"/>
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/phone_number_input"
@@ -64,7 +65,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorPrimaryDark"
         android:text="send code"
         android:textColor="#fff" />
 

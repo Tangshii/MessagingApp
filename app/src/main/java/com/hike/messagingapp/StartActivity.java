@@ -5,7 +5,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -45,12 +47,16 @@ public class StartActivity extends AppCompatActivity {
     protected void onStart(){
         super.onStart();
 
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(firebaseUser != null){
-            Intent intent = new Intent(StartActivity.this, MainActivity.class);
-            startActivity(new Intent(StartActivity.this, MainActivity.class)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        SharedPreferences prefs = getApplication().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
+        boolean login = prefs.getBoolean("login", false);
+        if(login){
+            firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            if(firebaseUser != null){
+                startActivity(new Intent(StartActivity.this, MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            }
         }
+
 
     }
 

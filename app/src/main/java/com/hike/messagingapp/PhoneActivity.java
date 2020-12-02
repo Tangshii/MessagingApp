@@ -1,11 +1,13 @@
 package com.hike.messagingapp;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -55,6 +57,7 @@ public class PhoneActivity extends AppCompatActivity {
 
     private String mVerificationId;
     private PhoneAuthProvider.ForceResendingToken mResendToken;
+    boolean once = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,13 +83,14 @@ public class PhoneActivity extends AppCompatActivity {
         InputVerificationCode = (EditText) findViewById(R.id.verification_code_input);
         loadingBar = new ProgressDialog(this);
 
-        // tap send Verificationn code button
+        // tap send Verification code button
         SendVerificationCodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final String phoneNumber = InputPhoneNumber.getText().toString();
                 String name = username.getText().toString();
                 final String fname = username.getText().toString();
+                once = true;
                 // check if empty fields
                 if (TextUtils.isEmpty(phoneNumber) || TextUtils.isEmpty(name)) {
                     Toast.makeText(PhoneActivity.this, "enter username and phone-number ", Toast.LENGTH_SHORT).show();
@@ -96,8 +100,9 @@ public class PhoneActivity extends AppCompatActivity {
                     loadingBar.setMessage("Verifying...");
                     loadingBar.setCanceledOnTouchOutside(false);
                     loadingBar.show();
-                    // check is username is taken, and create phone request
-                    checkUsername(fname, phoneNumber);
+
+                    PhoneAuthProvider.getInstance().verifyPhoneNumber(phoneNumber, 10,
+                            TimeUnit.SECONDS, PhoneActivity.this, callbacks);
                 }
 
             }
@@ -158,61 +163,11 @@ public class PhoneActivity extends AppCompatActivity {
         };
 
 
-        // close keyboard on tap outside
-        if(findViewById(R.id.container) != null) {
-            findViewById(R.id.container).setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (getCurrentFocus().getWindowToken() != null) {
-                        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-                    }
-                    return true;
-                }
-            });
-        }
+
 
     }
 
-    void checkUsername(final String fname, final String phoneNumber){
-        reference = FirebaseDatabase.getInstance().getReference("Users");
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                boolean alreadyExist = false;
-                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                    User user = snapshot.getValue(User.class);
-                    if (user.getUsername() != null) {
 
-                        if (user.getUsername().equals(fname)) {
-                            alreadyExist = true;
-                            Log.e("AAAAAAAAAAAAAAA", user.getUsername());
-
-                        }
-                    }
-                }
-
-                if(alreadyExist){
-                    error.setText("username already exist");
-                    error.setVisibility(View.VISIBLE);
-                    loadingBar.dismiss();
-                }
-                else{
-                    error.setVisibility(View.INVISIBLE);
-
-                    InputVerificationCode.setVisibility(View.VISIBLE);
-                    VerifyButton.setVisibility(View.VISIBLE);
-
-                    PhoneAuthProvider.getInstance().verifyPhoneNumber(phoneNumber, 10,
-                            TimeUnit.SECONDS, PhoneActivity.this, callbacks);
-                }
-                return;
-
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) { }
-        });
-    }
 
 
     private void signInWithPhoneAuthCredential(final PhoneAuthCredential credential, final String username) {
@@ -270,6 +225,23 @@ public class PhoneActivity extends AppCompatActivity {
             }
         });
         loadingBar.dismiss();
+    }
+
+
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if ( v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 
 

@@ -1,17 +1,28 @@
 package com.hike.messagingapp.Fragments;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,10 +46,15 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.hike.messagingapp.MainActivity;
+import com.hike.messagingapp.Model.Chat;
 import com.hike.messagingapp.Model.User;
 import com.hike.messagingapp.R;
 import com.hike.messagingapp.RegisterActivity;
 import com.hike.messagingapp.StartActivity;
+import com.rengwuxian.materialedittext.MaterialEditText;
+import com.skydoves.colorpickerview.ColorEnvelope;
+import com.skydoves.colorpickerview.ColorPickerDialog;
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener;
 
 import java.util.HashMap;
 
@@ -52,6 +68,11 @@ public class ProfileFragment extends Fragment {
     CircleImageView image_profile;
     TextView username;
     Button logout;
+    EditText bio;
+    ImageButton btn_send;
+
+
+    RelativeLayout relativeLayout;
 
     DatabaseReference reference;
     FirebaseUser fuser;
@@ -60,6 +81,8 @@ public class ProfileFragment extends Fragment {
     private static final int IMAGE_REQUEST = 1;
     private Uri imageUri;
     private StorageTask uploadTask;
+
+    Toast toast;
 
 
     @Override
@@ -70,6 +93,19 @@ public class ProfileFragment extends Fragment {
         image_profile = view.findViewById(R.id.profile_image);
         username = view.findViewById(R.id.username);
         logout = view.findViewById(R.id.logout);
+        bio = view.findViewById(R.id.bio);
+        btn_send = view.findViewById(R.id.btn_send);
+        relativeLayout = view.findViewById(R.id.profile_tap);
+        registerForContextMenu(relativeLayout);
+
+        SharedPreferences prefs = this.getActivity().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
+        int primary = prefs.getInt("primary", -1);
+        int secondary = prefs.getInt("secondary", -1);
+        if(secondary != -1){
+            relativeLayout.setBackgroundColor(secondary);
+        }
+        if(primary!= -1)
+            logout.setBackgroundColor(primary);
 
         storageReference = FirebaseStorage.getInstance().getReference("uploads");
 
@@ -97,6 +133,19 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        btn_send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("bio", bio.getText().toString());
+                reference.updateChildren(hashMap);
+                showAToast("Bio updated");
+            }
+        });
+
+
+
         return view;
     }
 
@@ -117,6 +166,7 @@ public class ProfileFragment extends Fragment {
     private void uploadImage(){
         final ProgressDialog pd = new ProgressDialog(getContext());
         pd.setMessage("Uploading...");
+        pd.setCanceledOnTouchOutside(false);
         pd.show();
 
         if (imageUri != null){
@@ -146,6 +196,7 @@ public class ProfileFragment extends Fragment {
                         reference.updateChildren(map);
 
                         pd.dismiss();
+                        Toast.makeText(getContext(), "upload success", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
                         pd.dismiss();
@@ -180,14 +231,16 @@ public class ProfileFragment extends Fragment {
     }
 
     void setProfilePic(){
-        reference.addValueEventListener(new ValueEventListener() {
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 username.setText(user.getUsername());
+                if(user.getBio()!=null)
+                    bio.setText(user.getBio());
                 if (user.getImageURL() != null ) {
                     if (user.getImageURL().equals("default")) {
-                        image_profile.setImageResource(R.mipmap.ic_launcher);
+                        image_profile.setImageResource(R.drawable.account);
                     } else {
                         if (getActivity() != null) {
                             Glide.with(getContext()).load(user.getImageURL()).into(image_profile);
@@ -202,4 +255,56 @@ public class ProfileFragment extends Fragment {
             }
         });
     }
+
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, final View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        SharedPreferences prefs = this.getActivity().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = prefs.edit();
+
+        if(v.getId() == R.id.profile_tap) {
+            new ColorPickerDialog.Builder(getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+                    .setPreferenceName("MyColorPickerDialog")
+                    .setPositiveButton("confirm",
+                            new ColorEnvelopeListener() {
+                                @Override
+                                public void onColorSelected(ColorEnvelope envelope, boolean fromUser) {
+
+                                    int color = envelope.getColor();
+                                    relativeLayout.setBackgroundColor(envelope.getColor());
+                                    editor.putInt("secondary", color);
+                                    editor.apply();
+
+                                }
+                            })
+                    .setNegativeButton("cancel",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            })
+                    .attachAlphaSlideBar(true)
+                    .attachBrightnessSlideBar(true)
+                    .show();
+        }
+    }
+
+
+
+    public void showAToast (String st){ //"Toast toast" is declared in the class
+        try{ toast.getView().isShown();     // true if visible
+            toast.setText(st);
+        } catch (Exception e) {         // invisible if exception
+            toast = Toast.makeText(getContext(), st, Toast.LENGTH_SHORT);
+        }
+        toast.show();  //finally display it
+    }
+
+
+
+
 }
