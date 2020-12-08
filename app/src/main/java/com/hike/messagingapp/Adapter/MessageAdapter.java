@@ -28,7 +28,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public static final int MSG_TYPE_LEFT = 0;
     public static final int MSG_TYPE_RIGHT = 1;
 
-
     private Context mContext;
     private List<Chat> mChat; // list of messages
     private String imageurl; // receiver profile pic
@@ -38,6 +37,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     FirebaseUser fuser;
 
+    //constructor for the adapter, taking in context, arraylist of Chats class instance,
+    // receiver image url, sender image url, and an onClickListener for translation
     public MessageAdapter(Context mContext, List<Chat> mChat, String imageurl, String userImg, OnItemClickListener onItemClickListener){
         this.mChat = mChat;
         this.mContext = mContext;
@@ -49,11 +50,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @NonNull
     @Override
+
     public MessageAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == MSG_TYPE_RIGHT) { //message is from sender
             // inflate recycler view with chat item right
             View view = LayoutInflater.from(mContext).inflate(R.layout.chat_item_right, parent, false);
-
+            // set color of views
             SharedPreferences colorPref = mContext.getSharedPreferences("colorPref", Context.MODE_PRIVATE);
             int primary = colorPref.getInt("primary", -1);
             if(primary != -1){
@@ -68,12 +70,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     }
 
 
-
-
-
     @Override
     public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
-
+        // get position of message for onClickItemListener
         Chat chat = mChat.get(position);
 
         holder.show_message.setText(chat.getMessage());
@@ -100,20 +99,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         } else {
             holder.txt_seen.setVisibility(View.GONE);
         }
-
-
-
-
-
-
-
     }
 
     @Override
     public int getItemCount() {
         return mChat.size();
     }
-
 
     @Override
     public int getItemViewType(int position) {
@@ -125,15 +116,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         }
     }
 
-    public String getImageurl() {
-        return imageurl;
-    }
-
-    public String getUserImg() {
-        return userImg;
-    }
-
-    public  class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public TextView show_message;
         public ImageView profile_image;
@@ -154,7 +137,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         }
 
-
         @Override
         public void onClick(View v) {
             onItemClickListener.onItemClick(getAdapterPosition());
@@ -165,7 +147,5 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public interface OnItemClickListener {
         void onItemClick(int postition);
     }
-
-
 
 }

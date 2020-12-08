@@ -91,10 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
-
-
     }
-
 
 
     // register using firebase auth
@@ -107,6 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
         reference = FirebaseDatabase.getInstance().getReference("Users");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
+            // search if username exist already
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 boolean alreadyExist = false;
                 for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
@@ -115,17 +113,18 @@ public class RegisterActivity extends AppCompatActivity {
 
                         if (user.getUsername().equals(username)) {
                             alreadyExist = true;
-                            Log.e("AAAAAAAAAAAAAAA", user.getUsername());
 
                         }
                     }
                 }
 
+                // show that username is taken
                 if(alreadyExist){
                     error.setText("username already exist");
                     error.setVisibility(View.VISIBLE);
                     loadingBar.dismiss();
                 }
+                // create the user account
                 else{
                     auth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -149,7 +148,6 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
-
 
     }
 

@@ -1,7 +1,4 @@
-package com.hike.messagingapp.Fragments;
-
-import com.hike.messagingapp.Notifications.MyResponse;
-import com.hike.messagingapp.Notifications.Sender;
+package com.hike.messagingapp.Notifications;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

@@ -9,12 +9,19 @@ public class Chat {
     private String type;
     private String prevTranslate;
 
+<<<<<<< Updated upstream
     public Chat(String sender, String receiver, String message, boolean isseen, String type, String prevTranslate) {
+=======
+    public Chat(String sender, String receiver, String message, boolean isseen, String prevTranslate) {
+>>>>>>> Stashed changes
         this.sender = sender;
         this.receiver = receiver;
         this.message = message;
         this.isseen = isseen;
+<<<<<<< Updated upstream
         this.type = type;
+=======
+>>>>>>> Stashed changes
         this.prevTranslate = prevTranslate;
     }
 

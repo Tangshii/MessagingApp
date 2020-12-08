@@ -71,7 +71,6 @@ public class ProfileFragment extends Fragment {
     EditText bio;
     ImageButton btn_send;
 
-
     RelativeLayout relativeLayout;
 
     DatabaseReference reference;
@@ -83,7 +82,6 @@ public class ProfileFragment extends Fragment {
     private StorageTask uploadTask;
 
     Toast toast;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -108,17 +106,15 @@ public class ProfileFragment extends Fragment {
             logout.setBackgroundColor(primary);
 
         storageReference = FirebaseStorage.getInstance().getReference("uploads");
-
         fuser = FirebaseAuth.getInstance().getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
 
         setProfilePic();
 
-
         image_profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openImage(); // open image upload
+                openGallery();
             }
         });
 
@@ -144,26 +140,42 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-
-
         return view;
     }
 
+    void setProfilePic(){
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                username.setText(user.getUsername());
+                if(user.getBio()!=null)
+                    bio.setText(user.getBio());
+                if (user.getImageURL() != null ) {
+                    if (user.getImageURL().equals("default")) {
+                        image_profile.setImageResource(R.drawable.account);
+                    } else {
+                        if (getActivity() != null) {
+                            Glide.with(getContext()).load(user.getImageURL()).into(image_profile);
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
 
-    private void openImage() {
+    // start intent for image gallery
+    private void openGallery() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(intent, IMAGE_REQUEST);
     }
 
-    private String getFileExtension(Uri uri){
-        ContentResolver contentResolver = getContext().getContentResolver();
-        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
-    }
-
     private void uploadImage(){
+        // start loading dialog
         final ProgressDialog pd = new ProgressDialog(getContext());
         pd.setMessage("Uploading...");
         pd.setCanceledOnTouchOutside(false);
@@ -173,6 +185,7 @@ public class ProfileFragment extends Fragment {
             final  StorageReference fileReference = storageReference.child(System.currentTimeMillis()
                     +"."+getFileExtension(imageUri));
 
+            //start upload task to firebase
             uploadTask = fileReference.putFile(imageUri);
             uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
@@ -180,7 +193,6 @@ public class ProfileFragment extends Fragment {
                     if (!task.isSuccessful()){
                         throw  task.getException();
                     }
-
                     return  fileReference.getDownloadUrl();
                 }
             }).addOnCompleteListener(new OnCompleteListener<Uri>() {
@@ -189,7 +201,7 @@ public class ProfileFragment extends Fragment {
                     if (task.isSuccessful()){
                         Uri downloadUri = task.getResult();
                         String mUri = downloadUri.toString();
-
+                        // add the url link to user table
                         reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
                         HashMap<String, Object> map = new HashMap<>();
                         map.put("imageURL", ""+mUri);
@@ -214,6 +226,12 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    private String getFileExtension(Uri uri){
+        ContentResolver contentResolver = getContext().getContentResolver();
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -229,34 +247,6 @@ public class ProfileFragment extends Fragment {
             }
         }
     }
-
-    void setProfilePic(){
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                username.setText(user.getUsername());
-                if(user.getBio()!=null)
-                    bio.setText(user.getBio());
-                if (user.getImageURL() != null ) {
-                    if (user.getImageURL().equals("default")) {
-                        image_profile.setImageResource(R.drawable.account);
-                    } else {
-                        if (getActivity() != null) {
-                            Glide.with(getContext()).load(user.getImageURL()).into(image_profile);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, final View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -292,8 +282,6 @@ public class ProfileFragment extends Fragment {
                     .show();
         }
     }
-
-
 
     public void showAToast (String st){ //"Toast toast" is declared in the class
         try{ toast.getView().isShown();     // true if visible

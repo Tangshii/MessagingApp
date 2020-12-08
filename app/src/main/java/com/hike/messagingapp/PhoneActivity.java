@@ -44,10 +44,7 @@ public class PhoneActivity extends AppCompatActivity {
     private EditText InputPhoneNumber, InputVerificationCode;
 
     MaterialEditText username;
-
     TextView error;
-
-
     DatabaseReference reference;
 
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks callbacks;
@@ -69,21 +66,17 @@ public class PhoneActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        username = findViewById(R.id.username);
-        error = findViewById(R.id.error);
-
-
-
         mAuth = FirebaseAuth.getInstance();
-
 
         SendVerificationCodeButton = (Button) findViewById(R.id.send_ver_code_button);
         VerifyButton = (Button) findViewById(R.id.verify_button);
         InputPhoneNumber = (EditText) findViewById(R.id.phone_number_input);
         InputVerificationCode = (EditText) findViewById(R.id.verification_code_input);
+        username = findViewById(R.id.username);
+        error = findViewById(R.id.error);
         loadingBar = new ProgressDialog(this);
 
-        // tap send Verification code button
+        // on tap send Verification code button
         SendVerificationCodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -109,7 +102,7 @@ public class PhoneActivity extends AppCompatActivity {
 
         });
 
-        // tap verify code button
+        // on tap verify code button
         VerifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
@@ -126,19 +119,19 @@ public class PhoneActivity extends AppCompatActivity {
                     loadingBar.show();
 
                     PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, verificationCode);
-                    signInWithPhoneAuthCredential(credential, name);
+                    signInPhone(credential, name);
                 }
             }
         });
 
-
+        // callback when PhoneAuthProvider is done
         callbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential)
             {
                 // this auto login on text receive
                 String name = username.getText().toString();
-                signInWithPhoneAuthCredential(phoneAuthCredential, name);
+                signInPhone(phoneAuthCredential, name);
             }
 
             @Override
@@ -146,31 +139,23 @@ public class PhoneActivity extends AppCompatActivity {
             {
                 loadingBar.dismiss();
                 Toast.makeText(PhoneActivity.this, e +"", Toast.LENGTH_SHORT).show();
-                Log.e("####################", e +"");
             }
 
             public void onCodeSent(String verificationId,
                                    PhoneAuthProvider.ForceResendingToken token)
             {
-                // Save verification ID and resending token so we can use them later
+                // Save verification ID and resending token
                 mVerificationId = verificationId;
                 mResendToken = token;
-
                 loadingBar.dismiss();
                 Toast.makeText(PhoneActivity.this, "Code has been sent", Toast.LENGTH_SHORT).show();
-
             }
         };
-
-
-
 
     }
 
 
-
-
-    private void signInWithPhoneAuthCredential(final PhoneAuthCredential credential, final String username) {
+    private void signInPhone(final PhoneAuthCredential credential, final String username) {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -182,11 +167,6 @@ public class PhoneActivity extends AppCompatActivity {
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
 
                             insertUser(firebaseUser.getUid(), username);
-
-                            Intent intent = new Intent(PhoneActivity.this, MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            finish();
                         }
                         else
                         {

@@ -54,23 +54,25 @@ public class UsersFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_users, container, false);
 
         relativeLayout = view.findViewById(R.id.frag_user);
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext())); //set manager to recycler view
-
-        mUsers = new ArrayList<>();
         textView = view.findViewById(R.id.user_tap);
+
+        mUsers = new ArrayList<>(); //array list for holding result of search
+
         registerForContextMenu(textView);
 
-        applyColorPref();
+        SharedPreferences prefs = this.getActivity().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
+        int secondary = prefs.getInt("secondary", -1);
+        if(secondary != -1){
+            relativeLayout.setBackgroundColor(secondary);
+        }
 
-        //readUsers();
         // searches whenever user types
         search_users = view.findViewById(R.id.search_users);
         search_users.addTextChangedListener(new TextWatcher() {
@@ -121,9 +123,7 @@ public class UsersFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
     }
 
@@ -162,14 +162,6 @@ public class UsersFragment extends Fragment {
         }
     }
 
-    void applyColorPref(){
-        SharedPreferences prefs = this.getActivity().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
-        //int primary = prefs.getInt("primary", -1);
-        int secondary = prefs.getInt("secondary", -1);
-        if(secondary != -1){
-            relativeLayout.setBackgroundColor(secondary);
-        }
-    }
 
 
 
