@@ -4,17 +4,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 
-import android.text.Layout;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -31,7 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.hike.messagingapp.Adapter.UserAdapter;
-import com.hike.messagingapp.Model.Chatlist;
+import com.hike.messagingapp.Model.ChatList;
 import com.hike.messagingapp.Model.User;
 import com.hike.messagingapp.Notifications.Token;
 import com.hike.messagingapp.R;
@@ -54,7 +49,7 @@ public class ChatsFragment extends Fragment {
     FirebaseUser fuser;
     DatabaseReference reference;
 
-    private List<Chatlist> usersList;
+    private List<ChatList> usersList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,8 +60,11 @@ public class ChatsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext())); // set manager to recycler view
 
         textView = view.findViewById(R.id.chat_tap);
+
+        //register context menu on long tap a text view under the conservation list
         registerForContextMenu(textView);
 
+        // get color shared preferences and set view to the colors
         SharedPreferences prefs = this.getActivity().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
         int secondary = prefs.getInt("secondary", -1);
         if(secondary != -1){
@@ -76,7 +74,7 @@ public class ChatsFragment extends Fragment {
 
         fuser = FirebaseAuth.getInstance().getCurrentUser();
 
-
+        // search for chat lists that has the user as a receiver and adds to user’s chatlist arraylist
         usersList = new ArrayList<>();
         // get all the chat list the user has
         reference = FirebaseDatabase.getInstance().getReference("Chatlist").child(fuser.getUid());
@@ -86,17 +84,14 @@ public class ChatsFragment extends Fragment {
                 usersList.clear();
                 // add all the chat list the user has to array list
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    Chatlist chatlist = snapshot.getValue(Chatlist.class);
+                    ChatList chatlist = snapshot.getValue(ChatList.class);
                     usersList.add(chatlist);
                 }
                 // get the receiver info in the list
                 getUserInChat();
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
 
         updateToken(FirebaseInstanceId.getInstance().getToken());
@@ -114,7 +109,7 @@ public class ChatsFragment extends Fragment {
                 mUsers.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){ //loop thru all users
                     User user = snapshot.getValue(User.class);
-                    for (Chatlist chatlist : usersList){ // loop thru chats user has
+                    for (ChatList chatlist : usersList){ // loop thru chats user has
                         if (user.getId() != null) {
                             if (user.getId().equals(chatlist.getId())) {//add that user if it's also in the chats
                                 mUsers.add(user);
@@ -127,11 +122,8 @@ public class ChatsFragment extends Fragment {
                 userAdapter = new UserAdapter(getContext(), mUsers, true);
                 recyclerView.setAdapter(userAdapter);
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
     }
 
@@ -175,11 +167,5 @@ public class ChatsFragment extends Fragment {
         Token token1 = new Token(token);
         reference.child(fuser.getUid()).setValue(token1);
     }
-
-
-
-
-
-
 
 }

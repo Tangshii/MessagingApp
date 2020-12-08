@@ -63,7 +63,6 @@ public class TranslateActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_translate);
 
-
         // put intent extra back to messages
         Intent intent = getIntent();
         final String receiverId = intent.getStringExtra("receiverId");
@@ -88,7 +87,7 @@ public class TranslateActivity extends AppCompatActivity {
             }
         });
 
-
+        // find views
         final Button send_msg = findViewById(R.id.send_msg);
         if(main)
             send_msg.setVisibility(View.GONE);
@@ -102,14 +101,13 @@ public class TranslateActivity extends AppCompatActivity {
         final Spinner targetLangSelector = findViewById(R.id.targetLangSelector);
         ConstraintLayout layout = findViewById(R.id.translate);
 
-
+        // get color shared preferences and set view to the colors
         SharedPreferences prefs = getApplication().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
         int primary = prefs.getInt("primary", -1);
         int secondary = prefs.getInt("secondary", -1);
         if(primary != -1){
             sourceSyncButton.setBackgroundColor(primary);
             targetSyncButton.setBackgroundColor(primary);
-            //switchButton.setBackgroundTintList(primary);
             send_msg.setBackgroundColor(primary);
             toolbar.setBackgroundColor(primary);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -123,9 +121,7 @@ public class TranslateActivity extends AppCompatActivity {
             layout.setBackgroundColor(secondary);
         }
 
-
-
-
+        // translation model
         final TranslateViewModel viewModel = ViewModelProviders.of(this).get(TranslateViewModel.class);
 
         // Get available language list and set up source and target language spinners
@@ -136,8 +132,6 @@ public class TranslateActivity extends AppCompatActivity {
         targetLangSelector.setAdapter(adapter);
         sourceLangSelector.setSelection(adapter.getPosition(new TranslateViewModel.Language("en")));
         targetLangSelector.setSelection(adapter.getPosition(new TranslateViewModel.Language("es")));
-
-
 
         // set shared preferences for languages if any
         prefs = getApplication().getSharedPreferences("languages", Context.MODE_PRIVATE);
@@ -163,8 +157,7 @@ public class TranslateActivity extends AppCompatActivity {
             editor.putString("target", target).apply();
         }
 
-
-
+        // drop down menu for source languages
         sourceLangSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -172,14 +165,14 @@ public class TranslateActivity extends AppCompatActivity {
                 viewModel.sourceLang.setValue(adapter.getItem(position));
 
                 setSourceLang(adapter.getItem(position).getCode());
-                //Toast.makeText(TranslateActivity.this, "Translation settings saved", Toast.LENGTH_SHORT).show();
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 targetTextView.setText("");
             }
         });
+
+        // drop down menu for target languages
         targetLangSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -187,15 +180,14 @@ public class TranslateActivity extends AppCompatActivity {
                 viewModel.targetLang.setValue(adapter.getItem(position));
 
                 setTargetLang(adapter.getItem(position).getCode());
-                //Toast.makeText(TranslateActivity.this, "Translation settings saved", Toast.LENGTH_SHORT).show();
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 targetTextView.setText("");
             }
         });
 
+        // switches source and target language
         switchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -236,12 +228,9 @@ public class TranslateActivity extends AppCompatActivity {
         // Translate input text as it is typed
         srcTextView.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -274,13 +263,10 @@ public class TranslateActivity extends AppCompatActivity {
             }
         });
 
-
-
         send_msg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(targetTextView.getText().toString()!=null) {
-
                     Intent intent = new Intent(TranslateActivity.this, MessageActivity.class);
                     intent.putExtra("translated_msg", targetTextView.getText().toString());
                     intent.putExtra("userid", receiverId); //put the receiver uid
@@ -291,15 +277,11 @@ public class TranslateActivity extends AppCompatActivity {
         });
     }
 
-
-
     private void setProgressText(TextView tv) {
         tv.setText(TranslateActivity.this.getString(R.string.translate_progress));
     }
 
-
     public void setSourceLang(String source){
-
         SharedPreferences prefs = getApplication().getSharedPreferences("languages", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 

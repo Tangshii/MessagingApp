@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -29,7 +28,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.hike.messagingapp.MessageActivity;
 import com.hike.messagingapp.Model.Chat;
-import com.hike.messagingapp.Model.Chatlist;
 import com.hike.messagingapp.Model.User;
 import com.hike.messagingapp.R;
 
@@ -46,12 +44,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     final FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
 
-
     public UserAdapter(Context mContext, List<User> mUsers, boolean ischat) {
         this.mUsers = mUsers;
         this.mContext = mContext;
         this.ischat = ischat;
-
     }
 
     @NonNull
@@ -67,8 +63,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         final User user = mUsers.get(position);
 
-        // sets holder.username.setText(user.getUsername());
-        setUsername(user, holder);
+        setUsernames(user, holder);
 
         // set the profile image of the searched users
         if (user.getImageURL().equals("default")) {
@@ -102,7 +97,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 mContext.startActivity(intent);
             }
         });
-
 
 
         // Delete show two dialogs and deletes convo fore both sides
@@ -160,6 +154,72 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     }
 
 
+    // sets holder.username and put number of unread messages
+    private void setUsernames(final User user, final ViewHolder holder) {
+        // get firebase user
+        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        // get Chats table
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
+        //search Chats table
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                int unread = 0;
+                // loop thru each Chats
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Chat chat = snapshot.getValue(Chat.class);
+                    if (firebaseUser != null && chat.getReceiver() != null) {
+                        // if receiver is user and message is not seen
+                        if ((chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(user.getId()))
+                                && !chat.isIsseen()) {
+                            unread++;
+                        }
+                    }
+                }
+                // set username with number of unread messages
+                if (unread == 0) {
+                    holder.username.setText(user.getUsername());
+                } else {
+                    holder.username.setText(user.getUsername() + " (" + unread + ")");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
+
+
+    //check for last message
+    private void lastMessage(final String userid, final TextView last_msg) {
+        theLastMessage = "default";
+        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Chat chat = snapshot.getValue(Chat.class);
+                    if (firebaseUser != null && chat.getReceiver() != null) {
+                        if (chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid) ||
+                                chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())) {
+                            theLastMessage = chat.getMessage();
+                        }
+                    }
+                }
+
+                if (theLastMessage == "default")
+                    last_msg.setText("No Message");
+                else
+                    last_msg.setText(theLastMessage);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
+
 
     void getReceiver(final String receiverName){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
@@ -200,7 +260,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                         break;
                 }
 
-
                 //delete receiver convo
                 final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Chatlist")
                         .child(receiverId).child(fUser.getUid());
@@ -217,16 +276,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                     public void onCancelled(@NonNull DatabaseError databaseError) { }
                 });
 
-
                 deleteChats(receiverId);
-
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
 
     }
-
 
     // delete actual messages
     void deleteChats(final String receiverId){
@@ -238,7 +294,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Chat chat = snapshot.getValue(Chat.class);
-
                     if (chat.getReceiver() != null && chat.getSender()!=null) {
 
                         if (chat.getSender().equals(fUser.getUid()) && chat.getReceiver().equals(receiverId) ||
@@ -248,10 +303,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                         }
 
                     }
-
                 }
                 loading.dismiss();
-
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) { }
@@ -286,74 +339,4 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }
     }
 
-
-    // sets holder.username and put number of unread messages
-    private void setUsername(final User user, final ViewHolder holder) {
-        // get firebase user
-        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        // get Chats table
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
-        //search Chats table
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                int unread = 0;
-                // loop thru each Chats
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Chat chat = snapshot.getValue(Chat.class);
-                    if (firebaseUser != null && chat.getReceiver() != null) {
-                        // if receiver is user and message is not seen
-                        if ((chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(user.getId()))
-                                && !chat.isIsseen()) {
-                            unread++;
-                        }
-                    }
-                }
-                // set username with number of unread messages
-                if (unread == 0) {
-                    holder.username.setText(user.getUsername());
-                } else {
-                    holder.username.setText(user.getUsername() + " (" + unread + ")");
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
-    }
-
-
-    //check for last message
-    private void lastMessage(final String userid, final TextView last_msg) {
-        theLastMessage = "default";
-        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
-
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Chat chat = snapshot.getValue(Chat.class);
-                    if (firebaseUser != null && chat.getReceiver() != null) {
-                        if (chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid) ||
-                                chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())) {
-                            theLastMessage = chat.getMessage();
-                        }
-                    }
-                }
-
-                if (theLastMessage == "default")
-                    last_msg.setText("No Message");
-                else
-                    last_msg.setText(theLastMessage);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
 }

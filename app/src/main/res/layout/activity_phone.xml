@@ -2,27 +2,26 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PhoneActivity"
     android:orientation="vertical"
-    android:id="@+id/container"
-    >
+    tools:context=".PhoneActivity">
 
     <include
         android:id="@+id/toolbar"
-        layout="@layout/bar_layout"/>
+        layout="@layout/bar_layout" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="20dp"
+        android:gravity="center_horizontal"
+        android:padding="24dp"
         android:text="Phone login/register"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        android:padding="24dp"
-        android:gravity="center_horizontal" />
+        android:textStyle="bold" />
 
 
     <TextView
@@ -30,40 +29,39 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
+        android:gravity="left"
         android:text=""
         android:textColor="@color/red"
         android:textSize="15sp"
-        android:gravity="left"
-        android:visibility="gone"
-        />
+        android:visibility="gone" />
 
 
     <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/username"
-        android:layout_marginTop="1dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="1dp"
         android:layout_marginRight="16dp"
-        app:met_floatingLabel="normal"
-        android:hint="Set Username"/>
+        android:hint="Set Username"
+        app:met_floatingLabel="normal" />
 
     <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/phone_number_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="20dp"
         android:layout_marginRight="16dp"
-        app:met_floatingLabel="normal"
-        android:hint="phone number +1 for US"/>
+        android:hint="phone number +1 for US"
+        app:met_floatingLabel="normal" />
 
     <Button
         android:id="@+id/send_ver_code_button"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_marginTop="30dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="30dp"
         android:layout_marginRight="16dp"
         android:background="@color/colorPrimaryDark"
         android:text="send code"
@@ -73,29 +71,25 @@
         android:id="@+id/verification_code_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="30dp"
         android:layout_marginRight="16dp"
-        app:met_floatingLabel="normal"
         android:hint="Verification code"
-        android:visibility="invisible"/>
-
-
-
+        android:visibility="invisible"
+        app:met_floatingLabel="normal" />
 
 
     <Button
         android:id="@+id/verify_button"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_marginTop="20dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="20dp"
         android:layout_marginRight="16dp"
         android:background="@color/colorPrimaryDark"
         android:text="verify"
         android:textColor="#fff"
-        android:visibility="invisible"/>
-
+        android:visibility="invisible" />
 
 
 </LinearLayout>

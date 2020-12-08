@@ -68,16 +68,12 @@ public class TranslateViewModel extends AndroidViewModel {
                 }
             };
 
-
-
+    // set inital languages to english and spanish
     public TranslatorOptions options = new TranslatorOptions.Builder()
             .setSourceLanguage("en")
             .setTargetLanguage("es")
             .build();
     public Observer<Language> languageObserver;
-
-
-
 
     public MutableLiveData<Language> sourceLang = new MutableLiveData<>();
     public MutableLiveData<Language> targetLang = new MutableLiveData<>();
@@ -216,9 +212,6 @@ public class TranslateViewModel extends AndroidViewModel {
                 });
     }
 
-    public void setSrcText(String message) {
-    }
-
     /**
      * Holds the result of the translation or any error.
      */
@@ -291,21 +284,6 @@ public class TranslateViewModel extends AndroidViewModel {
         translators.evictAll();
     }
 
-
-    public void setSrcTxt(String s) {
-        srcTxt = s;
-    }
-
-    public Translator myTranslator() {
-        //Log.e("WWWWWWWWWWWWWWW", srcTxt );
-
-
-
-        return translators.get(options);
-
-    }
-
-
     public void setLanguages(String source, String target) {
 
         options = new TranslatorOptions.Builder()
@@ -315,8 +293,6 @@ public class TranslateViewModel extends AndroidViewModel {
 
         //translatedText.addSource(source, languageObserver);
         //translatedText.addSource(targetLang, languageObserver);
-
-
     }
 
 
@@ -324,55 +300,4 @@ public class TranslateViewModel extends AndroidViewModel {
         return translators.get(options);
     }
 }
-/*
-
-    public void setSourceLang(String source){
-
-        SharedPreferences prefs = getApplication().getSharedPreferences("languages", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        editor.putString("source", source);
-        editor.apply();
-
-        sourceLang.setValue(new TranslateViewModel.Language(source));
-
-        //translatedText.addSource(sourceLang, languageObserver);
-
-    }
-
-    public void setTargetLang(String target){
-        SharedPreferences prefs = getApplication().getSharedPreferences("languages", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        editor.putString("source", target);
-        editor.apply();
-
-        targetLang.setValue(new TranslateViewModel.Language(target));
-
-        //translatedText.addSource(targetLang, languageObserver);
-
-    }
-
-
-    void readLanguagePref(){
-        SharedPreferences prefs = getApplication().getSharedPreferences("languages", Context.MODE_PRIVATE);
-        String source = prefs.getString("source", "error");
-        String target = prefs.getString("target", "error");
-        if(source!=null) {
-            //sourceLang.setValue(new TranslateViewModel.Language(source));
-            translatedText.addSource(sourceLang, languageObserver);
-        } else{
-            //sourceLang.setValue(new TranslateViewModel.Language("es"));
-            translatedText.addSource(sourceLang, languageObserver);
-        }
-        if(target!=null) {
-            //targetLang.setValue(new TranslateViewModel.Language(target));
-            translatedText.addSource(targetLang, languageObserver);
-        } else{
-            //targetLang.setValue(new TranslateViewModel.Language("en"));
-            translatedText.addSource(targetLang, languageObserver);
-        }
-    }
-
-*/
 

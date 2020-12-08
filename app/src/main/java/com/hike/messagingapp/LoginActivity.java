@@ -40,20 +40,25 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // set up toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        auth = FirebaseAuth.getInstance();
-
-        loadingBar = new ProgressDialog(this);
-
+        // find views
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
         btn_login = findViewById(R.id.btn_login);
         forgot_password = findViewById(R.id.forgot_password);
 
+        // get firebase auth for sign in
+        auth = FirebaseAuth.getInstance();
+
+        // for loading animation
+        loadingBar = new ProgressDialog(this);
+
+        // when tap forgot password
         forgot_password.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,6 +66,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // when tap login button
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,16 +87,10 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-
     }
 
-
-
+    // sign in with with firebase auth
     private void login(String txt_email, String txt_password){
-
         auth.signInWithEmailAndPassword(txt_email, txt_password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
@@ -109,8 +109,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-
-
+    // close keyboard if tap outside of edit text
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             View v = getCurrentFocus();

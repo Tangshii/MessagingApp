@@ -42,11 +42,8 @@ public class StartActivity extends AppCompatActivity {
 
     private ProgressDialog loadingBar;
 
-
-
     protected void onStart(){
         super.onStart();
-
         SharedPreferences prefs = getApplication().getSharedPreferences("colorPref", Context.MODE_PRIVATE);
         boolean login = prefs.getBoolean("login", false);
         if(login){
@@ -56,11 +53,7 @@ public class StartActivity extends AppCompatActivity {
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             }
         }
-
-
     }
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +64,14 @@ public class StartActivity extends AppCompatActivity {
         login  = findViewById(R.id.login);
         register = findViewById(R.id.register);
         phone = findViewById(R.id.phone_button);
-
         loadingBar = new ProgressDialog(this);
+
+        auth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if(firebaseUser != null){
+            startActivity(new Intent(StartActivity.this, MainActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(
                 GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -82,17 +81,33 @@ public class StartActivity extends AppCompatActivity {
         googleSignInClient = GoogleSignIn.getClient(StartActivity.this
                 ,googleSignInOptions);
 
+        // link to login activity
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(StartActivity.this, LoginActivity.class));
+            }
+        });
 
-        auth = FirebaseAuth.getInstance();
+        // link to register activity
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(StartActivity.this, RegisterActivity.class));
+            }
+        });
 
-        FirebaseUser firebaseUser = auth.getCurrentUser();
+        // link to phone sign in activity
+        phone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view)
+            {
+                Intent phoneIntent = new Intent(StartActivity.this, PhoneActivity.class);
+                startActivity(phoneIntent);
+            }
+        });
 
-        if(firebaseUser != null){
-            startActivity(new Intent(StartActivity.this, MainActivity.class)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        }
-
-
+        // link to google sign in
         btSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,29 +116,6 @@ public class StartActivity extends AppCompatActivity {
                 loadingBar.show();
                 Intent intent = googleSignInClient.getSignInIntent();
                 startActivityForResult(intent,100);
-            }
-        });
-
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(StartActivity.this, LoginActivity.class));
-            }
-        });
-
-        register.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(StartActivity.this, RegisterActivity.class));
-            }
-        });
-
-        phone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Intent phoneIntent = new Intent(StartActivity.this, PhoneActivity.class);
-                startActivity(phoneIntent);
             }
         });
     }
@@ -139,6 +131,7 @@ public class StartActivity extends AppCompatActivity {
                 String s = "Google sign in successful";
                 Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
                 try{
+                    // sign in with google
                     GoogleSignInAccount googleSignInAccount = signInAccountTask
                             .getResult(ApiException.class);
                     if(googleSignInAccount != null){
@@ -146,6 +139,7 @@ public class StartActivity extends AppCompatActivity {
                                 .getCredential(googleSignInAccount.getIdToken()
                                         ,null);
 
+                        // sign in with firebase
                         auth.signInWithCredential(authCredential)
                                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                                     @Override
@@ -159,8 +153,8 @@ public class StartActivity extends AppCompatActivity {
                                             FirebaseUser firebaseUser = auth.getCurrentUser();
                                             String userid = firebaseUser.getUid();
 
+                                            // insert into user table
                                             DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(userid);
-                                            //String isGoogleSignUp = "true";
                                             String username = firebaseUser.getDisplayName();
                                             String profile_image = firebaseUser.getPhotoUrl().toString();
                                             HashMap<String, String > hashMap = new HashMap<>();
@@ -183,28 +177,22 @@ public class StartActivity extends AppCompatActivity {
 
                                                 } });
 
-
                                             finish();
                                         }
                                         else{
                                             Toast.makeText(StartActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
                                         }
-
                                         loadingBar.dismiss();
                                     }
                                 });
 
-
                     }
-
 
                 } catch (ApiException e) {
                     e.printStackTrace();
                 }
-
             }
         }
-
 
     }
 

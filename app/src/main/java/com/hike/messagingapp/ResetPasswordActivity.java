@@ -51,6 +51,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
                 if (email.equals("")){
                     Toast.makeText(ResetPasswordActivity.this, "All fields required", Toast.LENGTH_SHORT).show();
                 } else {
+                    // firebase's method for reset password through mail
                     firebaseAuth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {

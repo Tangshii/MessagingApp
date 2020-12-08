@@ -7,18 +7,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -46,7 +42,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import com.hike.messagingapp.Adapter.MessageAdapter;
-import com.hike.messagingapp.Fragments.APIService;
+import com.hike.messagingapp.Notifications.APIService;
 
 import com.hike.messagingapp.Model.Chat;
 import com.hike.messagingapp.Model.TranslateViewModel;
@@ -111,6 +107,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         relativeLayout = findViewById(R.id.bottom);
         loading = new ProgressDialog(this);
         loading.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
         // Translate model
         translateModel = new ViewModelProvider(this).get(TranslateViewModel.class);
 
@@ -161,9 +158,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
             relativeLayout.setBackgroundColor(secondary);
         }
 
-
         apiService = Client.getClient("https://fcm.googleapis.com/").create(APIService.class);
-
 
         // get user who is sender
         fuser = FirebaseAuth.getInstance().getCurrentUser();
@@ -229,8 +224,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
 
         // set the receiver chat list
@@ -252,10 +246,8 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
                 notify = false;
                 //loading.dismiss();
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
 
 
@@ -272,7 +264,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
                     Token token = snapshot.getValue(Token.class);
 
                     // create data that goes into a notification
-                    Data data = new Data(fuser.getUid(), R.drawable.account, "  "+message,
+                    Data data = new Data(fuser.getUid(), R.drawable.ic_launcher_foreground, "  "+message,
                             username + ":", receiverId);
                     // put data with a sender
                     Sender sender = new Sender(data, token.getToken());
@@ -285,18 +277,13 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
                                 //Toast.makeText(MessageActivity.this, "Failed to send", Toast.LENGTH_SHORT).show();
                             }
                         }
-
                         @Override
-                        public void onFailure(Call<MyResponse> call, Throwable t) {
-                        }
+                        public void onFailure(Call<MyResponse> call, Throwable t) {}
                     });
                 }
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
     }
 
@@ -321,35 +308,9 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
 
-    }
-
-    private void seenMessage(final String userid) {
-        reference = FirebaseDatabase.getInstance().getReference("Chats");
-        seenListener = reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Chat chat = snapshot.getValue(Chat.class);
-                    if(chat.getReceiver()!=null && chat.getReceiver()!=null) {
-                        if (chat.getReceiver().equals(fuser.getUid()) && chat.getSender().equals(userid)) {
-                            HashMap<String, Object> hashMap = new HashMap<>();
-                            hashMap.put("isseen", true);
-                            snapshot.getRef().updateChildren(hashMap);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
 
@@ -379,87 +340,85 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         User user = dataSnapshot.getValue(User.class); // get a snapshot
 
-
                         if (user.getImageURL().equals("default")) {
 
-                            //** create message adapter and set it to recycler view using default img
+                            //create message adapter and set it to recycler view using default img
                             messageAdapter = new MessageAdapter(MessageActivity.this, mChat, imageurl, "default", MessageActivity.this);
                             recyclerView.setAdapter(messageAdapter);
                         } else { // else  load their save profile img
 
-                            //** create message adapter and set it to recycler view using their profile pic
+                            //create message adapter and set it to recycler view using their profile pic
                             messageAdapter = new MessageAdapter(MessageActivity.this, mChat, imageurl, user.getImageURL(), MessageActivity.this);
                             recyclerView.setAdapter(messageAdapter);
                         }
 
-
                     }
-
                     @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
+                    public void onCancelled(@NonNull DatabaseError databaseError) { }
                 });
             }
-
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
+
+    // set user's message to seen to true
+    private void seenMessage(final String userid) {
+        reference = FirebaseDatabase.getInstance().getReference("Chats");
+        seenListener = reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Chat chat = snapshot.getValue(Chat.class);
+                    if(chat.getReceiver()!=null && chat.getReceiver()!=null) {
+                        if (chat.getReceiver().equals(fuser.getUid()) && chat.getSender().equals(userid)) {
+                            HashMap<String, Object> hashMap = new HashMap<>();
+                            hashMap.put("isseen", true);
+                            snapshot.getRef().updateChildren(hashMap);
+                        }
+                    }
+                }
             }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
         });
     }
 
 
 
     @Override
+    // when user tap on a message
     public void onItemClick(final int position) {
         final Chat chat = mChat.get(position);
         final String msg = chat.getMessage();
 
+        // see if there is a previous translation
         if(chat.getPrevTranslate()!=null){
+            // flip flop the previous translation back to ordinal language
             chat.setMessage( chat.getPrevTranslate() );
             chat.setPrevTranslate( msg );
             messageAdapter.notifyItemChanged(position);
-
-        }else {
-
+        }
+        else {
+            // get translation model and translate the message
             translateModel.getTranslator().translate(msg).addOnCompleteListener(new OnCompleteListener<String>() {
                 @Override
                 public void onComplete(@NonNull Task<String> task) {
                     if (task.isSuccessful()) {
-                        chat.setMessage(task.getResult());
-                        chat.setPrevTranslate(msg);
+                        chat.setMessage(task.getResult()); // set message to new translation
+                        chat.setPrevTranslate(msg); // save the original text
 
                         Toast.makeText(MessageActivity.this, task.getResult(), Toast.LENGTH_SHORT).show();
 
-                        messageAdapter.notifyItemChanged(position);
-
+                        messageAdapter.notifyItemChanged(position); // change the the recycler view item
                     } else {
-
                         Toast.makeText(MessageActivity.this, task.getException().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-
                     }
                 }
             });
         }
 
     }
-
-
-
-    private void currentUser(String userid) {
-        SharedPreferences.Editor editor = getSharedPreferences("PREFS", MODE_PRIVATE).edit();
-        editor.putString("currentuser", userid);
-        editor.apply();
-    }
-
-    private void status(String status) {
-        reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
-
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("status", status);
-
-        reference.updateChildren(hashMap);
-    }
-
 
 
     // show friends profile in dialog
@@ -515,7 +474,6 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         return true;
     }
 
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -530,7 +488,6 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
             case R.id.colors:
                 showColorDialog();
         }
-
         return false;
     }
 
@@ -593,7 +550,6 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         alertDialog.show();
     }
 
-
     void setToolbarColor(int color){
         toolbar.setBackgroundColor(color);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -608,6 +564,18 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         editor.apply();
     }
 
+    private void currentUser(String userid) {
+        SharedPreferences.Editor editor = getSharedPreferences("PREFS", MODE_PRIVATE).edit();
+        editor.putString("currentuser", userid);
+        editor.apply();
+    }
+
+    private void status(String status) {
+        reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("status", status);
+        reference.updateChildren(hashMap);
+    }
 
     @Override
     protected void onResume() {
@@ -623,7 +591,5 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         status("offline");
         currentUser("none");
     }
-
-
 
 }
