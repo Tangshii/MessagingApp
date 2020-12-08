@@ -5,8 +5,6 @@ Major features (unique/key)
 2. Phone signin/login
 3. Tap translation - (also from a conversation go to translation settings, type what you want, then tap send as message to get it in the message bar)
 4. Tap color customization –(long top on certain screen to access color menu also)
-
-Other features
 5. Profile Image upload
 6. Profile bio – can write your own bio and see others, tap arrow to save
 7. Profiles images shown in chat
