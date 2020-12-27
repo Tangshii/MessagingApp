@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/title"
         android:gravity="center"
-        android:text="Hike Messaging App"
+        android:text="Hermes Messaging App"
         android:textSize="25sp"
         android:textStyle="bold"
         android:textColor="#fff"/>

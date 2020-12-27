@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hike.messagingapp">
+    package="com.tange.messagingapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -13,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.hike.messagingapp.StartActivity">
+        <activity android:name="com.tange.messagingapp.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,26 +21,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.hike.messagingapp.RegisterActivity"
-            android:parentActivityName="com.hike.messagingapp.StartActivity" />
-        <activity android:name="com.hike.messagingapp.MainActivity" />
+            android:name="com.tange.messagingapp.RegisterActivity"
+            android:parentActivityName="com.tange.messagingapp.StartActivity" />
+        <activity android:name="com.tange.messagingapp.MainActivity" />
         <activity
-            android:name="com.hike.messagingapp.LoginActivity"
-            android:parentActivityName="com.hike.messagingapp.StartActivity" />
+            android:name="com.tange.messagingapp.LoginActivity"
+            android:parentActivityName="com.tange.messagingapp.StartActivity" />
         <activity
-            android:name="com.hike.messagingapp.PhoneActivity"
-            android:parentActivityName="com.hike.messagingapp.StartActivity" />
-        <activity android:name="com.hike.messagingapp.MessageActivity" />
+            android:name="com.tange.messagingapp.PhoneActivity"
+            android:parentActivityName="com.tange.messagingapp.StartActivity" />
+        <activity android:name="com.tange.messagingapp.MessageActivity" />
         <activity
-            android:name="com.hike.messagingapp.ResetPasswordActivity"
-            android:parentActivityName="com.hike.messagingapp.LoginActivity" />
+            android:name="com.tange.messagingapp.ResetPasswordActivity"
+            android:parentActivityName="com.tange.messagingapp.LoginActivity" />
 
         <activity
-            android:name="com.hike.messagingapp.TranslateActivity"
+            android:name="com.tange.messagingapp.TranslateActivity"
              />
 
 
-        <service android:name="com.hike.messagingapp.Notifications.MyFirebaseIdService"
+        <service android:name="com.tange.messagingapp.Notifications.MyFirebaseIdService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -48,7 +48,7 @@
             </intent-filter>
         </service>
 
-        <service android:name="com.hike.messagingapp.Notifications.MyFirebaseMessaging"
+        <service android:name="com.tange.messagingapp.Notifications.MyFirebaseMessaging"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

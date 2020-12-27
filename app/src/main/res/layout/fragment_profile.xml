@@ -37,7 +37,7 @@
         android:layout_below="@+id/username"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/btn_send"
-        android:background="@android:color/transparent"
+
         android:hint="bio" />
 
     <ImageButton
